@@ -1,0 +1,100 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <Platforms>x64</Platforms>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishSingleFile>true</PublishSingleFile>
+    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+    <LangVersion>preview</LangVersion>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <Optimize>false</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DefineConstants>DEBUG; x64</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DefineConstants>TRACE; x64</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DllExportIdent>3C4586F1-FE79-4787-9112-569643EEF257</DllExportIdent>
+    <DllExportMetaLibName>DllExport.dll</DllExportMetaLibName>
+    <DllExportNamespace>DetroidBecameFast</DllExportNamespace>
+    <DllExportDDNSCecil>true</DllExportDDNSCecil>
+    <PlatformTarget>x64</PlatformTarget>
+    <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
+    <DllExportGenExpLib>false</DllExportGenExpLib>
+    <DllExportOurILAsm>false</DllExportOurILAsm>
+    <DllExportSysObjRebase>false</DllExportSysObjRebase>
+    <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
+    <DllExportTimeout>30000</DllExportTimeout>
+    <DllExportPeCheck>2</DllExportPeCheck>
+    <DllExportPatches>0</DllExportPatches>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="packages\**" />
+    <EmbeddedResource Remove="packages\**" />
+    <None Remove="packages\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="DllExport.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="4.1.0" />
+    <PackageReference Include="DllExport">
+      <Version>1.7.0</Version>
+      <Visible>false</Visible>
+      <Wz>1</Wz>
+    </PackageReference>
+    <PackageReference Include="Iced" Version="1.7.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="libScePad_ori.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SRL.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
+      <HintPath>$(SolutionDir)packages\DllExport.1.7.0\gcache\$(DllExportMetaXBase)\$(DllExportNamespace)\$(DllExportMetaLibName)</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  <ImportGroup Label=".NET DllExport">
+    <Import Project="$(SolutionDir)packages\DllExport.1.7.0\tools\net.r_eg.DllExport.targets" Condition="Exists($([MSBuild]::Escape('$(SolutionDir)packages\DllExport.1.7.0\tools\net.r_eg.DllExport.targets')))" Label="8337224c9ad9e356" />
+  </ImportGroup>
+  <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(SolutionDir)DllExport.bat')" Text="DllExport.bat is not found. Path: '$(SolutionDir)' - https://github.com/3F/DllExport" />
+    <Exec Condition="('$(DllExportModImported)' != 'true' Or !Exists('$(SolutionDir)packages\DllExport.1.7.0\tools\net.r_eg.DllExport.targets')) And Exists('$(SolutionDir)DllExport.bat')" Command=".\DllExport.bat  -action Restore" WorkingDirectory="$(SolutionDir)" />
+  </Target>
+  <Target Name="DllExportRPkgDynamicImport" BeforeTargets="PostBuildEvent" DependsOnTargets="GetFrameworkPaths" Condition="'$(DllExportModImported)' != 'true' And '$(DllExportRPkgDyn)' != 'false'">
+    <MSBuild BuildInParallel="true" UseResultsCache="true" Projects="$(MSBuildProjectFullPath)" Properties="DllExportRPkgDyn=true" Targets="Build" />
+  </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="cd &quot;$(TargetDir)&quot;&#xD;&#xA;del /q libScePad.dll&#xD;&#xA;ren DetroidBecameFast.dll libScePad.dll" />
+  </Target>
+</Project>
