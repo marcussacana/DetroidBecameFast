@@ -1,4 +1,7 @@
-﻿using System;
+﻿using NvAPIWrapper;
+using NvAPIWrapper.DRS;
+using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace DetroidBecameFast
@@ -19,6 +22,29 @@ namespace DetroidBecameFast
                 ThreadPriorityHook = new SetThreadPriority();
                 ThreadPriorityHook.OnThreadPriorityChanged = OnThreadPriorityChanged;
                 ThreadPriorityHook.Install();
+
+                var NVPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "nvapi64.dll");
+                if (File.Exists(NVPath))
+                {
+                    NVIDIA.Initialize();
+                    using (var Session = DriverSettingsSession.CreateAndLoad())
+                    {
+                        var Application = Session.FindApplication(Process.GetCurrentProcess().MainModule.FileName);
+                        if (Application != null)
+                        {
+                            Application.Profile.SetSetting(KnownSettingId.OpenGLThreadControl, 1);
+                            Session.Save();
+                        }
+#if DEBUG
+                        else
+                        {
+                            LOG.WriteLine("Failed to Find the Application Profile");
+                            LOG.Flush();
+                        }
+#endif
+                    }
+                    NVIDIA.Unload();
+                }
 #if DEBUG
             }
             catch (Exception ex)
@@ -38,8 +64,8 @@ namespace DetroidBecameFast
 
             return Priority switch
             {
-                ThreadPriority.TIME_CRITICAL => ThreadPriority.ABOVE_NORMAL,
-                ThreadPriority.HIGHEST => ThreadPriority.ABOVE_NORMAL,
+                ThreadPriority.TIME_CRITICAL => ThreadPriority.HIGHEST,
+                //ThreadPriority.HIGHEST => ThreadPriority.ABOVE_NORMAL,
                 _ => Priority
             };
         }

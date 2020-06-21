@@ -57,7 +57,10 @@
     <None Remove="packages\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove=".gitattributes" />
+    <None Remove=".gitignore" />
     <None Remove="DllExport.bat" />
+    <None Remove="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="4.1.0" />
@@ -67,6 +70,7 @@
       <Wz>1</Wz>
     </PackageReference>
     <PackageReference Include="Iced" Version="1.7.0" />
+    <PackageReference Include="NvAPIWrapper.Net" Version="0.8.0.98" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
